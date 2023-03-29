@@ -104,7 +104,7 @@ class GCPAPI:
         try:
             ip = instance.network_interfaces[0].access_configs[0].nat_i_p
         except Exception as e:
-            if e == "list index out of range":
+            if str(e) == "list index out of range":
                 ip = None
             else:
                 raise Exception("Get instance IP failed")
@@ -208,7 +208,7 @@ class GCPAPI:
         old_ip = self.get_instance_ip()
         self.unbind_instance_ip()
         try_count = 0
-        while try_count < 100:
+        while try_count < 20:
             try_count += 1
             if self.get_static_ip_count() >= 8:
                 logger.info(
@@ -222,8 +222,8 @@ class GCPAPI:
             else:
                 logger.info("IP address already exists, retrying...")
         self.delete_unused_ip()
-        # 如果尝试次数超过 100 次，则休眠 1 小时
-        if try_count >= 100:
+        # 如果尝试次数超过 20 次，则休眠 1 小时
+        if try_count >= 20:
             logger.info(
                 "IP address change try count exceeded, sleeping for 1 hour...")
             time.sleep(3600)
