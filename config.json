@@ -1,0 +1,11 @@
+{
+    "project_name": "atomic-envelope-123456",
+    "instance_name": "instance-1",
+    "ip_name": "ip-test",
+    "zone_name": "asia-east1-a",
+    "port": 443,
+    "round_time": 600,
+    "key_path": "key.json",
+    "tcping_server": "",
+    "proxy": ""
+}

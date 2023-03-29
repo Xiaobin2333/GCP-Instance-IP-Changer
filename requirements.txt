@@ -1,0 +1,4 @@
+requests
+tcping
+google-auth
+google-cloud-compute
