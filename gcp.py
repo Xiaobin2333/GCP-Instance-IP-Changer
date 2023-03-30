@@ -250,7 +250,7 @@ class CheckGFW:
             with HiddenPrints():
                 ping.ping(4)
         except Exception as e:
-            raise Exception("Please check your server name and port")
+            return False
         rate = Ping._success_rate(ping)
         # 根据丢包率判断是否被墙
         if float(rate) > 0:
