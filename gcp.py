@@ -206,7 +206,6 @@ class GCPAPI:
     # 更换实例 IP 地址
     def change_ip(self):
         old_ip = self.get_instance_ip()
-        self.unbind_instance_ip()
         try_count = 0
         while try_count < 20:
             try_count += 1
@@ -216,6 +215,7 @@ class GCPAPI:
                 self.delete_unused_ip()
             new_ip = self.add_static_ip()
             if new_ip != old_ip and new_ip not in self.read_ip():
+                self.unbind_instance_ip()
                 self.bind_static_ip(new_ip)
                 self.record_ip(new_ip)
                 break
@@ -259,7 +259,7 @@ class CheckGFW:
 
     # 远程tcping
     def remote_tcping(server, port):
-        url = f"{tcping_server}/check"
+        url = f"{tcping_server}"
         params = {"server": server, "port": port}
         try:
             response = requests.get(url, params=params, timeout=10)
@@ -273,16 +273,62 @@ class CheckGFW:
         except Exception as e:
             raise Exception("Remote tcping request failed")
 
+    # 第三方tcping
+    def other_tcping(server, port):
+        url = f"https://ping.gd/api/ip-test/{server}:{port}"
+        try:
+            response = requests.get(url, timeout=10)
+            if response.status_code == 200:
+                result = response.json()[0]['result']['telnet_alive']
+                if result == True:
+                    return True
+                elif result == False:
+                    return False
+            else:
+                raise Exception("Other tcping return error")
+        except Exception as e:
+            raise Exception("Other tcping request failed")
+
+
+# 检查脚本运行地区
+def check_location():
+    url = "https://api.ip.sb/geoip"
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if data["country_code"] == "CN":
+                return True
+            else:
+                return False
+        else:
+            raise Exception("Check location return error")
+    except Exception as e:
+        raise Exception("Check location error")
+
 
 if __name__ == "__main__":
-    while True:
-        try:
-            gcp = GCPAPI(project_name, instance_name,
-                         ip_name, zone_name, region_name)
+    try:
+        gcp = GCPAPI(project_name, instance_name,
+                     ip_name, zone_name, region_name)
+        if check_location:
+            if proxy_url == "":
+                logger.error("Running in China, you must set proxy_url")
+                time.sleep(10)
+                exit()
+            else:
+                check = CheckGFW.local_tcping
+        else:
             if tcping_server:
                 check = CheckGFW.remote_tcping
             else:
-                check = CheckGFW.local_tcping
+                check = CheckGFW.other_tcping
+    except Exception as e:
+        logger.error(str(e))
+        time.sleep(10)
+        exit()
+    while True:
+        try:
             ip = gcp.get_instance_ip()
             if not ip:
                 logger.warning("IP is empty, adding IP...")
