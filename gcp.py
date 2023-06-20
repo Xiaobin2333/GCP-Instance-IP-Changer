@@ -59,6 +59,16 @@ try:
             if proxy_url != "":
                 os.environ["http_proxy"] = proxy_url
                 os.environ["https_proxy"] = proxy_url
+            # 检查json文件是否存在ignore参数
+            try:
+                ignore = config["ignore"]
+                if ignore == True:
+                    ignore_loc = True
+                else:
+                    ignore_loc = False
+            except:
+                ignore_loc = False
+                    
 except:
     logger.error("Error reading config")
     sys.exit(1)
@@ -311,11 +321,12 @@ if __name__ == "__main__":
     try:
         gcp = GCPAPI(project_name, instance_name,
                      ip_name, zone_name, region_name)
-        if check_location:
+        if check_location():
             if proxy_url == "":
-                logger.error("Running in China, you must set proxy_url")
-                time.sleep(10)
-                exit()
+                if ignore_loc:
+                    logger.error("Running in China, you must set proxy_url")
+                    time.sleep(10)
+                    exit()
             else:
                 check = CheckGFW.local_tcping
         else:
