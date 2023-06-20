@@ -322,12 +322,15 @@ if __name__ == "__main__":
         gcp = GCPAPI(project_name, instance_name,
                      ip_name, zone_name, region_name)
         check = CheckGFW.local_tcping
-        if check_location() and not ignore_loc:
-            if proxy_url == "":
-                logger.error("Running in China, you must set proxy_url")
-                time.sleep(10)
-                exit()
+        if not ignore_loc:
+            logger.info("Checking location...")
+            if check_location():
+                if proxy_url == "":
+                    logger.error("Running in China, you must set proxy_url")
+                    time.sleep(10)
+                    exit()
         else:
+            logger.info("Ignore location check")
             if tcping_server:
                 check = CheckGFW.remote_tcping
             else:
