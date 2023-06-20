@@ -41,7 +41,7 @@
     "tcping_server": "http(s)://server:port/path",  // 检测接口地址
     // 如果是在中国大陆运行，则需要配置代理地址
     "proxy": "http(s)://server:port",               // 代理地址
-    // "ignore": True                               // 忽略地区检测
+    // "ignore": "True"                             // 忽略地区检测
 }
 ```
 
