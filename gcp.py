@@ -62,7 +62,7 @@ try:
             # 检查json文件是否存在ignore参数
             try:
                 ignore = config["ignore"]
-                if ignore == True:
+                if ignore == "True":
                     ignore_loc = True
                 else:
                     ignore_loc = False
